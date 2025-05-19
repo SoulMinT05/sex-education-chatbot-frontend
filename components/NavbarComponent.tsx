@@ -16,13 +16,20 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
+import { SidebarTrigger, 
+    // useSidebar
+} from './ui/sidebar';
 
 const NavbarComponent = () => {
     const { setTheme } = useTheme();
+    // const { toggleSidebar } = useSidebar();
     return (
         <nav className="p-4 flex items-center justify-between">
             {/* LEFT */}
-            collapse
+            <SidebarTrigger />
+            {/* <Button variant="outline" onClick={() => toggleSidebar()}>
+                Custom Button
+            </Button> */}
             {/* RIGHT */}
             <div className="flex items-center gap-4">
                 <Link href="/">Trang chủ</Link>
