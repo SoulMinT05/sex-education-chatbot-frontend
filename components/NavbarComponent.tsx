@@ -38,8 +38,6 @@ const NavbarComponent = () => {
                 withCredentials: true,
             });
 
-            console.log('dataLogout: ', data);
-
             if (data.success) {
                 Cookies.remove('accessToken');
                 setIsLogin(false);

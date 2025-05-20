@@ -1,14 +1,14 @@
 'use client';
 
-import { Button } from '@/components/ui/button';
-import { useMyContext } from '@/contexts/MyContext';
+import ChatbotUser from '@/components/ChatbotUser';
 
-function Home() {
-    const { openAlertBox } = useMyContext();
+function HomePage() {
     return (
-        <div className="h-screen flex items-center justify-center">
-            <Button onClick={() => openAlertBox('success', 'Bạn đã click nút!')}>Click me!</Button>
-        </div>
+        <main className="w-full h-dvh bg-background">
+            <div className="max-w-4xl mx-auto h-full">
+                <ChatbotUser />
+            </div>
+        </main>
     );
 }
-export default Home;
+export default HomePage;
