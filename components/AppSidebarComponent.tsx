@@ -18,6 +18,7 @@ import Image from 'next/image';
 
 import logo from '../public/dogcute.jpg';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
+import { useMyContext } from '@/contexts/MyContext';
 
 const items = [
     {
@@ -48,6 +49,7 @@ const items = [
 ];
 
 const AppSidebarComponent = () => {
+    const { userInfo } = useMyContext();
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader className="py-4">
@@ -91,8 +93,19 @@ const AppSidebarComponent = () => {
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <SidebarMenuButton>
-                                    <User2 />
-                                    Tam Sun
+                                    {userInfo?.avatar ? (
+                                        <Image
+                                            src={userInfo?.avatar}
+                                            alt="logo"
+                                            width={20}
+                                            height={20}
+                                            objectFit="cover"
+                                            className="rounded-full"
+                                        />
+                                    ) : (
+                                        <User2 />
+                                    )}
+                                    {userInfo?.name}
                                     <ChevronUp className="ml-auto" />
                                 </SidebarMenuButton>
                             </DropdownMenuTrigger>

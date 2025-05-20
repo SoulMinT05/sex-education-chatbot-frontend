@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -16,13 +16,48 @@ import { Button } from '@/components/ui/button';
 import Link from 'next/link';
 import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
-import { SidebarTrigger, 
+import {
+    SidebarTrigger,
     // useSidebar
 } from './ui/sidebar';
+import { useMyContext } from '@/contexts/MyContext';
+import axiosToken from '@/apis/axiosToken';
+import { useRouter } from 'next/navigation';
+import Cookies from 'js-cookie';
 
 const NavbarComponent = () => {
+    const { userInfo, setIsLogin, openAlertBox } = useMyContext();
     const { setTheme } = useTheme();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
     // const { toggleSidebar } = useSidebar();
+    const router = useRouter();
+    const handleLogout = async () => {
+        setIsLoading(true);
+        try {
+            const { data } = await axiosToken.post('/api/user/logout', {
+                withCredentials: true,
+            });
+
+            console.log('dataLogout: ', data);
+
+            if (data.success) {
+                Cookies.remove('accessToken');
+                setIsLogin(false);
+                openAlertBox('success', data.message);
+                router.push('/login');
+            } else {
+                openAlertBox('error', data.message);
+            }
+        } catch (error: unknown) {
+            if (error instanceof Error) {
+                console.error('Lỗi đăng nhập:', error.message);
+            } else {
+                console.error('Lỗi đăng nhập:', error);
+            }
+        } finally {
+            setIsLoading(false);
+        }
+    };
     return (
         <nav className="p-4 flex items-center justify-between">
             {/* LEFT */}
@@ -36,7 +71,7 @@ const NavbarComponent = () => {
                 {/* THEME MENU */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon">
+                        <Button variant="outline" size="icon" className="cursor-pointer">
                             <Sun className="h-[1.2rem] w-[1.2rem] rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
                             <Moon className="absolute h-[1.2rem] w-[1.2rem] rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
                             <span className="sr-only">Toggle theme</span>
@@ -52,25 +87,27 @@ const NavbarComponent = () => {
                 {/* USER MENU */}
                 <DropdownMenu>
                     <DropdownMenuTrigger>
-                        <Avatar>
-                            <AvatarImage src="https://github.com/shadcn.png" />
-                            <AvatarFallback>CN</AvatarFallback>
+                        <Avatar className="cursor-pointer">
+                            <AvatarImage src={userInfo?.avatar} />
+                            <AvatarFallback>{userInfo?.name}</AvatarFallback>
                         </Avatar>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent sideOffset={10}>
                         <DropdownMenuLabel>Tài khoản</DropdownMenuLabel>
                         <DropdownMenuSeparator />
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
                             <User className="h-[19px] w-[19px] mr-2" />
                             Thông tin cá nhân
                         </DropdownMenuItem>
-                        <DropdownMenuItem>
+                        <DropdownMenuItem className="cursor-pointer">
                             <Settings className="h-[19px] w-[19px] mr-2" />
                             Cài đặt
                         </DropdownMenuItem>
-                        <DropdownMenuItem variant="destructive">
-                            <LogOut className="h-[19px] w-[19px] mr-2" />
-                            Đăng xuất
+                        <DropdownMenuItem variant="destructive" className="cursor-pointer">
+                            <div className="flex gap-2 items-center" onClick={handleLogout}>
+                                <LogOut className="h-[19px] w-[19px] mr-2" />
+                                Đăng xuất
+                            </div>
                         </DropdownMenuItem>
                     </DropdownMenuContent>
                 </DropdownMenu>

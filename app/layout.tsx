@@ -1,12 +1,12 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
-import AppSidebarComponent from '@/components/AppSidebarComponent';
-import NavbarComponent from '@/components/NavbarComponent';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
-import { SidebarProvider } from '@/components/ui/sidebar';
-import { cookies } from 'next/headers';
+// import { cookies } from 'next/headers';
 import { headers } from 'next/headers';
+import { MyContextProvider } from '@/contexts/MyContext';
+import { Toaster } from '@/components/ui/sonner';
+import MainLayout from '@/components/MainLayout';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -28,30 +28,24 @@ export default async function RootLayout({
 }: Readonly<{
     children: React.ReactNode;
 }>) {
-    const cookieStore = await cookies();
-    const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
+    // const cookieStore = await cookies();
+    // const defaultOpen = cookieStore.get('sidebar_state')?.value === 'true';
 
     const headersList = await headers();
     // const domain = headersList.get('x-forwarded-host') || 'localhost:3000';
     // const protocol = headersList.get('x-forwarded-proto') || 'http';
 
     const referer = headersList.get('referer') || '';
-    const pathname = referer ? new URL(referer).pathname : '/'; // 'login
+    const pathname = referer ? new URL(referer).pathname : '/login'; // 'login
+    console.log('pathname: ', pathname);
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}>
                 <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    {pathname !== '/login' ? (
-                        <SidebarProvider defaultOpen={defaultOpen}>
-                            <AppSidebarComponent />
-                            <main className="w-full ">
-                                <NavbarComponent />
-                                <div className="px-4">{children}</div>
-                            </main>
-                        </SidebarProvider>
-                    ) : (
-                        <main className="w-full">{children}</main>
-                    )}
+                    <MyContextProvider>
+                        <MainLayout>{children}</MainLayout>
+                        <Toaster position="top-right" />
+                    </MyContextProvider>
                 </ThemeProvider>
             </body>
         </html>
