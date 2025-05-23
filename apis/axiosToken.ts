@@ -4,8 +4,9 @@ import Cookies from 'js-cookie';
 // Dùng cho api logout
 
 const axiosToken = axios.create({
-    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
-    timeout: 10000,
+    // baseURL: process.env.NEXT_PUBLIC_BACKEND_URL_NODEJS,
+    baseURL: process.env.NEXT_PUBLIC_BACKEND_URL_PYTHON,
+    timeout: 60000,
     headers: {
         'Content-Type': 'application/json',
     },
@@ -14,9 +15,9 @@ const axiosToken = axios.create({
 
 axiosToken.interceptors.request.use(
     async (config) => {
-        const accessToken = Cookies.get('accessToken');
-        if (accessToken) {
-            config.headers.Authorization = `Bearer ${accessToken}`;
+        const access_token = Cookies.get('access_token');
+        if (access_token) {
+            config.headers.Authorization = `Bearer ${access_token}`;
         }
 
         config.withCredentials = true;

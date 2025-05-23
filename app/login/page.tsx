@@ -59,12 +59,11 @@ const LoginPage = () => {
                 openAlertBox('error', 'Vui lòng điền đầy đủ thông tin!');
                 return;
             }
-
             const { data } = await axiosAuth.post('/api/user/login', formFields);
             if (data.success) {
                 openAlertBox('success', data.message);
 
-                Cookies.set('accessToken', data?.data?.accessToken);
+                Cookies.set('access_token', data?.access_token);
                 setIsLogin(true);
 
                 router.push('/'); // ✅ Thay cho navigate('/')
@@ -92,14 +91,15 @@ const LoginPage = () => {
                 name: user?.providerData[0]?.displayName,
                 email: user?.providerData[0]?.email,
                 password: null,
+                hashed_password: null,
                 avatar: user?.providerData[0]?.photoURL,
                 phoneNumber: user?.providerData[0]?.phoneNumber,
                 role: 'user',
             };
-            const { data } = await axiosAuth.post('/api/user/auth-google', fields);
+            const { data } = await axiosAuth.post('/api/user/login-google', fields);
             if (data.success) {
                 openAlertBox('success', data.message);
-                Cookies.set('accessToken', data?.data?.accessToken);
+                Cookies.set('access_token', data?.access_token);
                 setIsLogin(true);
                 router.push('/'); // ✅ Thay cho navigate('/')
             } else {

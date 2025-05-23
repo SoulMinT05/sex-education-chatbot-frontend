@@ -4,10 +4,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { BarChart3Icon, FileTextIcon, LineChartIcon, CalculatorIcon, ArrowUpIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
-import { chat } from '@/actions/chat';
-import { readStreamableValue } from 'ai/rsc';
+// import { chat } from '@/actions/chat';
+// import { readStreamableValue } from 'ai/rsc';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
+import { Skeleton } from './ui/skeleton';
 
 const prompts = [
     {
@@ -31,6 +32,15 @@ const prompts = [
 export type Message = {
     role: 'user' | 'assistant';
     content: string;
+};
+
+export type PDFDoc = {
+    pageContent: string;
+    metadata?: {
+        source?: string;
+        pdf?: unknown; // hoặc cụ thể hơn nếu biết rõ cấu trúc
+        loc?: unknown;
+    };
 };
 
 const ChatbotUser = () => {
@@ -76,29 +86,47 @@ const ChatbotUser = () => {
         setHasStartedChat(true);
 
         try {
-            const { newMessage } = await chat([...conversation, userMessage]);
+            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL_PYTHON}/ask`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ question: input.trim() }),
+            });
+            console.log('res: ', res);
+            const data = await res.json();
+            console.log('dataSendMSG: ', data);
 
-            let textContent = '';
-
-            const assistantMessage: Message = {
-                role: 'assistant',
-                content: '',
-            };
-
-            setConversation((prev) => [...prev, assistantMessage]);
-
-            for await (const delta of readStreamableValue(newMessage)) {
-                textContent += delta;
-
-                setConversation((prev) => {
-                    const newConversation = [...prev];
-                    newConversation[newConversation.length - 1] = {
+            if (res.status === 200) {
+                setConversation((prev) => [
+                    ...prev,
+                    {
                         role: 'assistant',
-                        content: textContent,
-                    };
-                    return newConversation;
-                });
+                        content: data.answer || 'Không tìm thấy câu trả lời phù hợp.',
+                    },
+                ]);
             }
+
+            // INPUT GET FROM INTERNET
+            // const { newMessage } = await chat([...conversation, userMessage]);
+            // let textContent = '';
+            // const assistantMessage: Message = {
+            //     role: 'assistant',
+            //     content: '',
+            // };
+
+            // setConversation((prev) => [...prev, assistantMessage]);
+
+            // for await (const delta of readStreamableValue(newMessage)) {
+            //     textContent += delta;
+
+            //     setConversation((prev) => {
+            //         const newConversation = [...prev];
+            //         newConversation[newConversation.length - 1] = {
+            //             role: 'assistant',
+            //             content: textContent,
+            //         };
+            //         return newConversation;
+            //     });
+            // }
         } catch (error) {
             console.log('Error:', error);
             setConversation((prev) => [
@@ -158,30 +186,42 @@ const ChatbotUser = () => {
                         transition={{ duration: 0.2 }}
                         className="pt-8 space-y-4"
                     >
-                        {conversation?.map((message, index) => (
-                            <motion.div
-                                key={index}
-                                initial={{ opacity: 0, y: 20 }}
-                                animate={{ opacity: 1, y: 0 }}
-                                className={cn('flex', {
-                                    'justify-end': message.role === 'user',
-                                    'justify-start': message.role === 'assistant',
-                                })}
-                            >
-                                <div
-                                    className={cn('max-w-[80%] rounded-xl px-4 py-2', {
-                                        'bg-foreground text-background': message.role === 'user',
-                                        'bg-muted': message.role === 'assistant',
+                        {conversation?.map((message, index) => {
+                            const isLast = index === conversation.length - 1;
+                            return (
+                                <motion.div
+                                    key={index}
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className={cn('flex', {
+                                        'justify-end': message.role === 'user',
+                                        'justify-start': message.role === 'assistant',
                                     })}
                                 >
-                                    {message.role === 'assistant' ? (
-                                        <p className="whitespace-pre-wrap">{message.content}</p>
-                                    ) : (
-                                        <p className="whitespace-pre-wrap">{message.content}</p>
-                                    )}
-                                </div>
-                            </motion.div>
-                        ))}
+                                    <div
+                                        className={cn('max-w-[80%] rounded-xl px-4 py-2', {
+                                            'bg-foreground text-background': message.role === 'user',
+                                            'bg-muted': message.role === 'assistant',
+                                        })}
+                                    >
+                                        {/* {message.role === 'assistant' ? (
+                                            isLoading && isLastAssistant ? (
+                                                <Skeleton className="w-[536px] h-[48px] rounded-full" />
+                                            ) : (
+                                                <p className="whitespace-pre-wrap">{message.content}</p>
+                                            )
+                                        ) : (
+                                            <p className="whitespace-pre-wrap">{message.content}</p>
+                                        )} */}
+                                        {message.role === 'assistant' && isLast && isLoading ? (
+                                            <Skeleton className="w-[536px] h-[48px] rounded-full" />
+                                        ) : (
+                                            <p className="whitespace-pre-wrap">{message.content}</p>
+                                        )}
+                                    </div>
+                                </motion.div>
+                            );
+                        })}
                         <div ref={messageEndRef}></div>
                     </motion.div>
                 )}
@@ -213,6 +253,11 @@ const ChatbotUser = () => {
                                     e.preventDefault();
                                     handleSendMessage();
                                 }
+                            }}
+                            onPaste={(e) => {
+                                e.preventDefault();
+                                const text = e.clipboardData.getData('text/plain');
+                                document.execCommand('insertText', false, text); // bỏ định dạng
                             }}
                             ref={(element) => {
                                 inputRef.current = element;

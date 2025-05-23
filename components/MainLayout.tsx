@@ -29,7 +29,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         const getUserDetails = async () => {
             try {
-                const { data } = await axiosClient.get('/api/user/user-details');
+                const { data } = await axiosClient.get('/api/user/get-user-details');
                 setUserInfo(data?.user);
             } catch (error) {
                 console.log(error);

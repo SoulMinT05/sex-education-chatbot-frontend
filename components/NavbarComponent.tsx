@@ -39,7 +39,7 @@ const NavbarComponent = () => {
             });
 
             if (data.success) {
-                Cookies.remove('accessToken');
+                Cookies.remove('access_token');
                 setIsLogin(false);
                 openAlertBox('success', data.message);
                 router.push('/login');

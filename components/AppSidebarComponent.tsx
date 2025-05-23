@@ -100,7 +100,7 @@ const AppSidebarComponent = () => {
                                             width={20}
                                             height={20}
                                             objectFit="cover"
-                                            className="rounded-full"
+                                            className="rounded-full object-cover"
                                         />
                                     ) : (
                                         <User2 />
