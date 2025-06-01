@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useRef, useState } from 'react';
-import { BarChart3Icon, FileTextIcon, LineChartIcon, CalculatorIcon, ArrowUpIcon } from 'lucide-react';
+import { BarChart3Icon, LineChartIcon, ArrowUpIcon, Mars, Venus } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Button } from './ui/button';
 // import { chat } from '@/actions/chat';
@@ -9,23 +9,30 @@ import { Button } from './ui/button';
 import { cn } from '@/lib/utils';
 import { useTheme } from 'next-themes';
 import { Skeleton } from './ui/skeleton';
+import axiosClient from '@/apis/axiosClient';
+import { useMyContext } from '@/contexts/MyContext';
+import { useRouter } from 'next/navigation';
+import ReactMarkdown from 'react-markdown';
+// import DOMPurify from 'dompurify';
+import remarkGfm from 'remark-gfm';
+// import rehypeRaw from 'rehype-raw';
 
 const prompts = [
     {
-        icon: <CalculatorIcon strokeWidth={1.8} className="size-5" />,
-        text: 'Generate the monthly income statement',
+        icon: <Mars strokeWidth={1.8} className="size-5" />,
+        text: 'Giới tính',
     },
     {
         icon: <LineChartIcon strokeWidth={1.8} className="size-5" />,
-        text: 'Provide a 12-month cash flow forecast',
+        text: 'Sinh sản',
     },
     {
-        icon: <FileTextIcon strokeWidth={1.8} className="size-5" />,
-        text: 'Book a journal entry',
+        icon: <Venus strokeWidth={1.8} className="size-5" />,
+        text: 'Giáo dục giới tính',
     },
     {
         icon: <BarChart3Icon strokeWidth={1.8} className="size-5" />,
-        text: 'Create a real-time financial dashboard',
+        text: 'Bình đẳng giới',
     },
 ];
 
@@ -33,6 +40,7 @@ export type Message = {
     role: 'user' | 'assistant';
     content: string;
 };
+export type Conversation = Message[][];
 
 export type PDFDoc = {
     pageContent: string;
@@ -44,13 +52,15 @@ export type PDFDoc = {
 };
 
 const ChatbotUser = () => {
+    const { getConversations } = useMyContext();
+    const router = useRouter();
     const messageEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLDivElement>(null);
 
     const [input, setInput] = useState<string>('');
-    const [conversation, setConversation] = useState<Message[]>([]);
+    const [conversation, setConversation] = useState<Conversation>([]);
 
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [isLoadingSendMessage, setIsLoadingSendMessage] = useState<boolean>(false);
     const [hasStartedChat, setHasStartedChat] = useState<boolean>(false);
 
     const { theme } = useTheme();
@@ -65,6 +75,14 @@ const ChatbotUser = () => {
         scrollToBottom();
     }, [input]);
 
+    const renderAssistantContent = (content: string) => {
+        return (
+            <div className="prose max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>{content}</ReactMarkdown>
+            </div>
+        );
+    };
+
     const handlePromptClick = (text: string) => {
         setInput(text);
         if (inputRef.current) {
@@ -73,7 +91,7 @@ const ChatbotUser = () => {
     };
 
     const handleSendMessage = async () => {
-        if (!input.trim() || isLoading) return;
+        if (!input.trim() || isLoadingSendMessage) return;
 
         const userMessage: Message = {
             role: 'user',
@@ -81,29 +99,36 @@ const ChatbotUser = () => {
         };
 
         setInput('');
-        setIsLoading(true);
-        setConversation((prev) => [...prev, userMessage]);
+        setIsLoadingSendMessage(true);
+        setConversation((prev) => [...prev, [userMessage]]);
         setHasStartedChat(true);
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_URL_PYTHON}/ask`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ question: input.trim() }),
+            const { data } = await axiosClient.post('/api/conversation/chat-auth', {
+                question: input.trim(),
             });
-            console.log('res: ', res);
-            const data = await res.json();
-            console.log('dataSendMSG: ', data);
+            console.log('dataChat: ', data);
 
-            if (res.status === 200) {
-                setConversation((prev) => [
-                    ...prev,
-                    {
-                        role: 'assistant',
-                        content: data.answer || 'Không tìm thấy câu trả lời phù hợp.',
-                    },
-                ]);
-            }
+            router.push(`/conversation/${data?.conversation_id}`);
+
+            const assistantMessage: Message = {
+                role: 'assistant',
+                content: data.answer || 'Không tìm thấy câu trả lời phù hợp.',
+            };
+
+            setConversation((prev) => {
+                const updated = [...prev];
+                const lastTurn = updated.pop();
+
+                if (lastTurn) {
+                    updated.push([...lastTurn, assistantMessage]);
+                }
+
+                return updated;
+            });
+
+            await getConversations();
+            console.log('Đã gọi getConversations sau khi submit!');
 
             // INPUT GET FROM INTERNET
             // const { newMessage } = await chat([...conversation, userMessage]);
@@ -129,15 +154,23 @@ const ChatbotUser = () => {
             // }
         } catch (error) {
             console.log('Error:', error);
-            setConversation((prev) => [
-                ...prev,
-                {
-                    role: 'assistant',
-                    content: 'Có lỗi xảy ra trong quá trình xử lý yêu cầu của bạn. Vui lòng thử lại sau.',
-                },
-            ]);
+            setConversation((prev) => {
+                const updated = [...prev];
+                const lastTurn = updated.pop();
+
+                if (lastTurn) {
+                    updated.push([
+                        ...lastTurn,
+                        {
+                            role: 'assistant',
+                            content: 'Đã có lỗi xảy ra khi xử lý câu hỏi.',
+                        },
+                    ]);
+                }
+                return updated;
+            });
         } finally {
-            setIsLoading(false);
+            setIsLoadingSendMessage(false);
         }
     };
 
@@ -186,42 +219,71 @@ const ChatbotUser = () => {
                         transition={{ duration: 0.2 }}
                         className="pt-8 space-y-4"
                     >
-                        {conversation?.map((message, index) => {
-                            const isLast = index === conversation.length - 1;
-                            return (
+                        {conversation?.length === 0 && (
+                            <>
                                 <motion.div
-                                    key={index}
                                     initial={{ opacity: 0, y: 20 }}
                                     animate={{ opacity: 1, y: 0 }}
-                                    className={cn('flex', {
-                                        'justify-end': message.role === 'user',
-                                        'justify-start': message.role === 'assistant',
-                                    })}
+                                    className="flex justify-end"
                                 >
-                                    <div
-                                        className={cn('max-w-[80%] rounded-xl px-4 py-2', {
-                                            'bg-foreground text-background': message.role === 'user',
-                                            'bg-muted': message.role === 'assistant',
-                                        })}
-                                    >
-                                        {/* {message.role === 'assistant' ? (
-                                            isLoading && isLastAssistant ? (
-                                                <Skeleton className="w-[536px] h-[48px] rounded-full" />
-                                            ) : (
-                                                <p className="whitespace-pre-wrap">{message.content}</p>
-                                            )
-                                        ) : (
-                                            <p className="whitespace-pre-wrap">{message.content}</p>
-                                        )} */}
-                                        {message.role === 'assistant' && isLast && isLoading ? (
-                                            <Skeleton className="w-[536px] h-[48px] rounded-full" />
-                                        ) : (
-                                            <p className="whitespace-pre-wrap">{message.content}</p>
-                                        )}
+                                    <div className="max-w-[80%] rounded-xl px-4 py-2 bg-foreground text-background">
+                                        <Skeleton className="w-[536px] h-[48px] rounded-full" />
                                     </div>
                                 </motion.div>
-                            );
-                        })}
+
+                                <motion.div
+                                    initial={{ opacity: 0, y: 20 }}
+                                    animate={{ opacity: 1, y: 0 }}
+                                    className="flex justify-start"
+                                >
+                                    <div className="max-w-[80%] rounded-xl px-4 py-2 bg-muted">
+                                        <Skeleton className="w-[536px] h-[48px] rounded-full" />
+                                    </div>
+                                </motion.div>
+                            </>
+                        )}
+
+                        {conversation?.length !== 0 &&
+                            conversation?.map((messagePair, pairIndex) => (
+                                <div key={pairIndex}>
+                                    {messagePair?.map((message, msgIndex) => {
+                                        console.log('conversation: ', conversation);
+                                        console.log('messagePair: ', messagePair);
+                                        const isLast =
+                                            pairIndex === conversation.length - 1 &&
+                                            msgIndex === messagePair.length - 1;
+                                        return (
+                                            <motion.div
+                                                key={msgIndex}
+                                                initial={{ opacity: 0, y: 20 }}
+                                                animate={{ opacity: 1, y: 0 }}
+                                                className={cn('flex', {
+                                                    'justify-end': message.role === 'user',
+                                                    'justify-start': message.role === 'assistant',
+                                                })}
+                                            >
+                                                <div
+                                                    className={cn('max-w-[80%] rounded-xl px-4 py-2', {
+                                                        'bg-foreground text-background': message.role === 'user',
+                                                        'bg-muted': message.role === 'assistant',
+                                                    })}
+                                                >
+                                                    {message.role === 'assistant' ? (
+                                                        // <Skeleton className="w-[536px] h-[48px] rounded-full" />
+                                                        isLast && isLoadingSendMessage ? (
+                                                            <Skeleton className="w-[536px] h-[48px] rounded-full" />
+                                                        ) : (
+                                                            renderAssistantContent(message.content)
+                                                        )
+                                                    ) : (
+                                                        <p className="whitespace-pre-wrap">{message.content}</p>
+                                                    )}
+                                                </div>
+                                            </motion.div>
+                                        );
+                                    })}
+                                </div>
+                            ))}
                         <div ref={messageEndRef}></div>
                     </motion.div>
                 )}

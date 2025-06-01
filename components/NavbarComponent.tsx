@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import {
     DropdownMenu,
@@ -13,8 +13,7 @@ import {
 
 import { Button } from '@/components/ui/button';
 
-import Link from 'next/link';
-import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Moon, Send, Settings, Sun, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import {
     SidebarTrigger,
@@ -24,15 +23,16 @@ import { useMyContext } from '@/contexts/MyContext';
 import axiosToken from '@/apis/axiosToken';
 import { useRouter } from 'next/navigation';
 import Cookies from 'js-cookie';
+import Link from 'next/link';
 
 const NavbarComponent = () => {
     const { userInfo, setIsLogin, openAlertBox } = useMyContext();
     const { setTheme } = useTheme();
-    const [isLoading, setIsLoading] = useState<boolean>(false);
+    // const [isLoading, setIsLoading] = useState<boolean>(false);
     // const { toggleSidebar } = useSidebar();
     const router = useRouter();
     const handleLogout = async () => {
-        setIsLoading(true);
+        // setIsLoading(true);
         try {
             const { data } = await axiosToken.post('/api/user/logout', {
                 withCredentials: true,
@@ -52,20 +52,28 @@ const NavbarComponent = () => {
             } else {
                 console.error('Lỗi đăng nhập:', error);
             }
-        } finally {
-            setIsLoading(false);
         }
+        //  finally {
+        //     setIsLoading(false);
+        // }
     };
     return (
         <nav className="p-4 flex items-center justify-between">
             {/* LEFT */}
-            <SidebarTrigger />
+            <div className="flex items-center gap-0 ">
+                <SidebarTrigger className="!h-6 !w-6 !cursor-pointer" />
+
+                <Button className="!cursor-pointer" onClick={() => router.push('/')} variant="ghost" size="icon">
+                    <Send strokeWidth={1.25} className="!h-6 !w-6" />
+                </Button>
+            </div>
             {/* <Button variant="outline" onClick={() => toggleSidebar()}>
                 Custom Button
             </Button> */}
             {/* RIGHT */}
             <div className="flex items-center gap-4">
                 <Link href="/">Trang chủ</Link>
+                <Link href="/talking-ai">Trò chuyện cùng AI</Link>
                 {/* THEME MENU */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

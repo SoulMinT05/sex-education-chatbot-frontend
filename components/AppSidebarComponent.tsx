@@ -1,5 +1,9 @@
-import React from 'react';
-import { Home, Inbox, Calendar, Settings, Search, User2, ChevronUp } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import {
+    // Home, Inbox, Calendar, Settings, Search,
+    User2,
+    ChevronUp,
+} from 'lucide-react';
 import {
     Sidebar,
     SidebarContent,
@@ -19,37 +23,35 @@ import Image from 'next/image';
 import logo from '../public/dogcute.jpg';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useMyContext } from '@/contexts/MyContext';
-
-const items = [
-    {
-        title: 'Home',
-        url: '#',
-        icon: Home,
-    },
-    {
-        title: 'Inbox',
-        url: '#',
-        icon: Inbox,
-    },
-    {
-        title: 'Calendar',
-        url: '#',
-        icon: Calendar,
-    },
-    {
-        title: 'Search',
-        url: '#',
-        icon: Search,
-    },
-    {
-        title: 'Settings',
-        url: '#',
-        icon: Settings,
-    },
-];
+import axiosClient from '@/apis/axiosClient';
+import { Skeleton } from './ui/skeleton';
 
 const AppSidebarComponent = () => {
-    const { userInfo } = useMyContext();
+    const { userInfo, conversation, setConversation } = useMyContext();
+    const [isLoading, setIsLoading] = useState<boolean>(false);
+    const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
+
+    useEffect(() => {
+        const getConversations = async () => {
+            try {
+                setIsLoading(true);
+                const { data } = await axiosClient.get('/api/conversation');
+                if (data.success) {
+                    setTimeout(() => {
+                        setConversation(data.conversations);
+                    }, 1000);
+                }
+            } catch (error) {
+                console.log(error);
+            } finally {
+                setTimeout(() => {
+                    setIsLoading(false);
+                }, 1000);
+            }
+        };
+        getConversations();
+    }, [userInfo?.id]);
+
     return (
         <Sidebar collapsible="icon">
             <SidebarHeader className="py-4">
@@ -58,7 +60,7 @@ const AppSidebarComponent = () => {
                         <SidebarMenuButton asChild>
                             <Link href="/">
                                 <Image src={logo} alt="logo" width={20} height={20} />
-                                <span>Sex Education Chatbot</span>
+                                <span>Chatbot Giáo dục giới tính</span>
                             </Link>
                         </SidebarMenuButton>
                     </SidebarMenuItem>
@@ -72,16 +74,43 @@ const AppSidebarComponent = () => {
                     <SidebarGroupLabel>Application</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
-                            {items.map((item) => (
-                                <SidebarMenuItem key={item.title}>
-                                    <SidebarMenuButton asChild>
-                                        <Link href={item.url}>
-                                            <item.icon />
-                                            <span>{item.title}</span>
-                                        </Link>
-                                    </SidebarMenuButton>
-                                </SidebarMenuItem>
-                            ))}
+                            {isLoading && conversation?.length === 0 && (
+                                <div className="space-y-2">
+                                    {Array.from({ length: 9 }).map((_, index) => (
+                                        <div
+                                            key={index}
+                                            className="bg-accent text-accent-foreground w-[239px] !rounded-md overflow-hidden"
+                                        >
+                                            <Skeleton className="w-[239px] h-[32px] rounded-md" />
+                                        </div>
+                                    ))}
+                                </div>
+                            )}
+                            {Array.isArray(conversation) &&
+                                conversation?.length !== 0 &&
+                                conversation?.map((conv) => {
+                                    const firstUserMsg = conv.conversation
+                                        .find((pair) => pair.find((msg) => msg.role === 'user'))
+                                        ?.find((msg) => msg.role === 'user');
+
+                                    return (
+                                        <SidebarMenuItem key={conv.id}>
+                                            <SidebarMenuButton
+                                                className={`${
+                                                    activeConversationId === conv.id
+                                                        ? 'bg-accent text-accent-foreground w-[239px] !rounded-md overflow-hidden' // Màu khi active
+                                                        : ''
+                                                }`}
+                                                asChild
+                                                onClick={() => setActiveConversationId(conv.id)}
+                                            >
+                                                <Link href={`/conversation/${conv.id}`}>
+                                                    <span>{firstUserMsg?.content || 'Không có câu hỏi'}</span>
+                                                </Link>
+                                            </SidebarMenuButton>
+                                        </SidebarMenuItem>
+                                    );
+                                })}
                         </SidebarMenu>
                     </SidebarGroupContent>
                 </SidebarGroup>
