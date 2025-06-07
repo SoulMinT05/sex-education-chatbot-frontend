@@ -73,7 +73,8 @@ const NavbarComponent = () => {
             {/* RIGHT */}
             <div className="flex items-center gap-4">
                 <Link href="/">Trang chủ</Link>
-                <Link href="/talking-ai">Trò chuyện cùng AI</Link>
+                <Link href="/video-agent">Text AI</Link>
+                <Link href="/video-agent-voice">Voice AI</Link>
                 {/* THEME MENU */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

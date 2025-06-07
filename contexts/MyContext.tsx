@@ -42,6 +42,8 @@ interface MyContextType {
     conversation: Conversation[];
     setConversation: (value: Conversation[]) => void;
     getConversations: () => Promise<void>;
+    chatResponse: string;
+    setChatResponse: (value: string) => void;
 }
 
 const MyContext = createContext<MyContextType | null>(null);
@@ -59,6 +61,7 @@ export const MyContextProvider = ({ children }: { children: React.ReactNode }) =
     const [isLoadingLogin, setIsLoadingLogin] = useState(true);
     const [userInfo, setUserInfo] = useState<UserInfo | null>(null);
     const [conversation, setConversation] = useState<Conversation[]>([]);
+    const [chatResponse, setChatResponse] = useState('');
 
     useEffect(() => {
         const token = Cookies.get('access_token');
@@ -101,6 +104,8 @@ export const MyContextProvider = ({ children }: { children: React.ReactNode }) =
         conversation,
         setConversation,
         getConversations,
+        chatResponse,
+        setChatResponse,
     };
     return <MyContext.Provider value={values}>{children}</MyContext.Provider>;
 };
