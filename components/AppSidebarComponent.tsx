@@ -71,7 +71,7 @@ const AppSidebarComponent = () => {
 
             <SidebarContent>
                 <SidebarGroup>
-                    <SidebarGroupLabel>Application</SidebarGroupLabel>
+                    <SidebarGroupLabel>Lịch sử trò chuyện</SidebarGroupLabel>
                     <SidebarGroupContent>
                         <SidebarMenu>
                             {isLoading && conversation?.length === 0 && (

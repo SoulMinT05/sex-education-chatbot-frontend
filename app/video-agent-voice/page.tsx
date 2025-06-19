@@ -10,6 +10,7 @@ import { useVideoAgentVoice } from '@/hooks/useVideoAgentVoice';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+// import Image from 'next/image';
 
 interface SpeechRecognition extends EventTarget {
     continuous: boolean;
@@ -60,7 +61,7 @@ const VideoAgentVoice = () => {
 
     const connectButtonRef = useRef<HTMLButtonElement>(null);
     const voiceTypingButtonRef = useRef<HTMLButtonElement>(null);
-    const talkButtonRef = useRef<HTMLButtonElement>(null);
+    // const talkButtonRef = useRef<HTMLButtonElement>(null);
     const destroyButtonRef = useRef<HTMLButtonElement>(null);
 
     const responseContainerRef = useRef<HTMLTextAreaElement>(null);
@@ -78,7 +79,7 @@ const VideoAgentVoice = () => {
         isConnected,
         isLoadingConnect,
         isLoadingDisconnect,
-        isLoadingTalk,
+        // isLoadingTalk,
         handleConnect,
         handleTalk,
         handleDisconnect,
@@ -145,10 +146,160 @@ const VideoAgentVoice = () => {
         }
     }, []);
 
+    // const handleStartRecognition = () => {
+    //     setIsLoadingVoiceTypingUser(true);
+    //     console.log('STARTING RECOGNITION');
+    //     voiceRecognitionRef.current?.start();
+    //     setIsLoadingVoiceTypingUser(false);
+    // };
+
+    // const handleStartRecognition = () => {
+    //     setIsLoadingVoiceTypingUser(true);
+    //     console.log('STARTING RECOGNITION');
+
+    //     let silenceTimeout: NodeJS.Timeout;
+
+    //     if (voiceRecognitionRef.current) {
+    //         // Nếu trước đó đang chạy thì stop trước
+    //         voiceRecognitionRef.current.stop();
+
+    //         voiceRecognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+    //             let final_transcript = '';
+    //             for (let i = event.resultIndex; i < event.results.length; ++i) {
+    //                 if (event.results[i].isFinal) {
+    //                     final_transcript += event.results[i][0].transcript;
+    //                 }
+    //             }
+
+    //             if (userInputRef.current) {
+    //                 userInputRef.current.innerText = final_transcript;
+    //             }
+
+    //             // Mỗi khi có kết quả, clear timeout cũ và set timeout mới
+    //             if (silenceTimeout) clearTimeout(silenceTimeout);
+
+    //             // Nếu người dùng ngừng nói 5s thì tự động gọi handleTalk
+    //             silenceTimeout = setTimeout(() => {
+    //                 console.log('🕒 Đã ngừng nói 5s, tự động gọi handleTalk');
+    //                 handleTalk();
+    //             }, 5000);
+    //         };
+
+    //         voiceRecognitionRef.current.onerror = (event: SpeechRecognitionEvent) => {
+    //             console.error('❌ Speech recognition error', event);
+    //         };
+
+    //         (
+    //             voiceRecognitionRef.current as SpeechRecognition & {
+    //                 onend: (this: SpeechRecognition, ev: Event) => void;
+    //             }
+    //         ).onend = () => {
+    //             console.log('📭 Speech recognition ended');
+    //             silenceTimeout = setTimeout(() => {
+    //                 console.log('🕒 Không nói tiếp sau khi kết thúc, gọi handleTalk');
+    //                 handleTalk();
+    //             }, 3000);
+    //         };
+
+    //         voiceRecognitionRef.current.start();
+    //     }
+
+    //     setIsLoadingVoiceTypingUser(false);
+    // };
+
+    const [isWaitingBotResponse, setIsWaitingBotResponse] = useState(false);
+    const [countdown, setCountdown] = useState(0);
+    const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const countdownIntervalRef = useRef<NodeJS.Timeout | null>(null);
+
     const handleStartRecognition = () => {
+        if (isWaitingBotResponse) {
+            console.log('Đang chờ bot trả lời, không thể hỏi tiếp.');
+            return;
+        }
+
         setIsLoadingVoiceTypingUser(true);
         console.log('STARTING RECOGNITION');
-        voiceRecognitionRef.current?.start();
+
+        if (voiceRecognitionRef.current) {
+            voiceRecognitionRef.current.stop();
+
+            voiceRecognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
+                let final_transcript = '';
+                for (let i = event.resultIndex; i < event.results.length; ++i) {
+                    if (event.results[i].isFinal) {
+                        final_transcript += event.results[i][0].transcript;
+                    }
+                }
+
+                if (userInputRef.current) {
+                    userInputRef.current.innerText = final_transcript;
+                }
+
+                // Clear timeout cũ
+                if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+                // Đặt timeout gọi handleTalk sau 5s ngừng nói
+                silenceTimeoutRef.current = setTimeout(() => {
+                    console.log('🕒 Đã ngừng nói 5s, gọi handleTalk');
+
+                    setIsWaitingBotResponse(true);
+                    setCountdown(3);
+
+                    // Bắt đầu đếm ngược 3 giây
+                    countdownIntervalRef.current = setInterval(() => {
+                        setCountdown((prev) => {
+                            if (prev <= 1) {
+                                clearInterval(countdownIntervalRef.current!);
+                                setIsWaitingBotResponse(false); // Mở lại nút hỏi
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+
+                    handleTalk();
+                }, 5000);
+            };
+
+            voiceRecognitionRef.current.onerror = (event: SpeechRecognitionEvent) => {
+                console.error('❌ Speech recognition error', event);
+            };
+
+            (
+                voiceRecognitionRef.current as SpeechRecognition & {
+                    onend: (this: SpeechRecognition, ev: Event) => void;
+                }
+            ).onend = () => {
+                console.log('📭 Speech recognition ended');
+
+                // Clear timeout cũ
+                if (silenceTimeoutRef.current) clearTimeout(silenceTimeoutRef.current);
+
+                silenceTimeoutRef.current = setTimeout(() => {
+                    console.log('🕒 Không nói tiếp, gọi handleTalk');
+
+                    setIsWaitingBotResponse(true);
+                    setCountdown(3);
+
+                    countdownIntervalRef.current = setInterval(() => {
+                        setCountdown((prev) => {
+                            if (prev <= 1) {
+                                clearInterval(countdownIntervalRef.current!);
+                                setIsWaitingBotResponse(false);
+                                return 0;
+                            }
+                            return prev - 1;
+                        });
+                    }, 1000);
+
+                    handleTalk();
+                }, 3000);
+            };
+
+            voiceRecognitionRef.current.start();
+        }
+
         setIsLoadingVoiceTypingUser(false);
     };
 
@@ -165,9 +316,10 @@ const VideoAgentVoice = () => {
             <div className="video-wrapper flex items-center justify-center">
                 <div className="video-container w-[320px] h-[320px] overflow-hidden rounded-full mx-auto mt-4">
                     <video
-                        className="idle-video"
+                        className="idle-video h-[320px] w-[320px] object-cover rounded-full"
                         ref={idleVideoRef}
-                        src="./oracle_Idle.mp4"
+                        // src="./oracle_Idle.mp4"
+                        src="./co-gai-cuoi.mp4"
                         autoPlay
                         muted
                         loop
@@ -176,6 +328,15 @@ const VideoAgentVoice = () => {
                     <video className="talk-video" ref={talkVideoRef} autoPlay playsInline style={{ display: 'none' }} />
                 </div>
             </div>
+            {/* <div className="">
+                <Image
+                    src="/Co Gai Hay Cuoi Large.png"
+                    width={200}
+                    height={200}
+                    alt=""
+                    className="w-[200px] h-[200px]"
+                />
+            </div> */}
             <div className="input-container flex items-center justify-center mt-8">
                 <motion.div
                     initial={{ opacity: 0, y: 10 }}
@@ -239,7 +400,7 @@ const VideoAgentVoice = () => {
                 >
                     {isLoadingConnect ? 'Đang kết nối...' : 'Kết nối'}
                 </Button>
-                <Button
+                {/* <Button
                     ref={voiceTypingButtonRef}
                     id="voice-typing-button"
                     type="button"
@@ -248,8 +409,23 @@ const VideoAgentVoice = () => {
                     disabled={isLoadingVoiceTypingUser}
                 >
                     {isLoadingVoiceTypingUser ? 'Đang xử lý...' : 'Người dùng hỏi'}
-                </Button>
+                </Button> */}
                 <Button
+                    ref={voiceTypingButtonRef}
+                    id="voice-typing-button"
+                    type="button"
+                    className={`py-[14px] px-[20px] cursor-pointer`}
+                    onClick={handleStartRecognition}
+                    disabled={isLoadingVoiceTypingUser || isWaitingBotResponse}
+                >
+                    {isLoadingVoiceTypingUser
+                        ? 'Đang xử lý...'
+                        : isWaitingBotResponse
+                        ? `Chờ bot trả lời trong ${countdown}s`
+                        : 'Người dùng hỏi'}
+                </Button>
+
+                {/* <Button
                     ref={talkButtonRef}
                     id="talk-button"
                     type="button"
@@ -258,7 +434,7 @@ const VideoAgentVoice = () => {
                     disabled={isLoadingTalk}
                 >
                     {isLoadingTalk ? 'Bot đang xử lý...' : 'Bot trả lời'}
-                </Button>
+                </Button> */}
                 <Button
                     ref={destroyButtonRef}
                     className="destroy-button py-[14px] px-[20px] cursor-pointer "

@@ -145,7 +145,9 @@ export function useVideoAgentVoice({
                 'Content-Type': 'application/json',
             },
             body: JSON.stringify({
-                source_url: 'https://raw.githubusercontent.com/jjmlovesgit/D-id_Streaming_Chatgpt/main/oracle_pic.jpg',
+                // source_url: 'https://raw.githubusercontent.com/jjmlovesgit/D-id_Streaming_Chatgpt/main/oracle_pic.jpg',
+                source_url:
+                    'https://raw.githubusercontent.com/SoulMinT05/avatar-storage/refs/heads/main/co-gai-hay-cuoi-large.png',
                 stream_warmup: true,
                 config: {
                     video_quality: 'hd',
