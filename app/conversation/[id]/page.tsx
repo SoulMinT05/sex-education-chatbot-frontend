@@ -45,14 +45,14 @@ const ConversationPage = () => {
                 if (data.success) {
                     setTimeout(() => {
                         setConversationDetails(data.conversation);
-                    }, 1000);
+                    }, 300);
                 }
             } catch (error) {
                 console.log(error);
             } finally {
                 setTimeout(() => {
                     setIsLoading(false); // trì hoãn 1 giây để giữ skeleton
-                }, 1000);
+                }, 300);
             }
         };
         getConversationDetails();

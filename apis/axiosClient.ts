@@ -25,7 +25,7 @@ axiosClient.interceptors.request.use(
     },
     (err) => {
         return Promise.reject(err);
-    },
+    }
 );
 
 axiosClient.interceptors.response.use(
@@ -40,7 +40,8 @@ axiosClient.interceptors.response.use(
 
             try {
                 const { data } = await axiosClient.get('/api/user/refresh_token');
-                const new_access_token = data?.access_token;
+                console.log('dataRefreshToken: ', data);
+                const new_access_token = data?.data?.access_token;
 
                 if (new_access_token) {
                     Cookies.set('access_token', new_access_token); // Lưu lại token mới
@@ -59,7 +60,7 @@ axiosClient.interceptors.response.use(
         }
         // Nếu không phải lỗi 401 hoặc đã thử refresh token
         return Promise.reject(err);
-    },
+    }
 );
 
 export default axiosClient;

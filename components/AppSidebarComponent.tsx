@@ -27,11 +27,13 @@ import axiosClient from '@/apis/axiosClient';
 import { Skeleton } from './ui/skeleton';
 
 const AppSidebarComponent = () => {
-    const { userInfo, conversation, setConversation } = useMyContext();
+    const { userInfo, conversation, setConversation, isLogin } = useMyContext();
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [activeConversationId, setActiveConversationId] = useState<string | null>(null);
 
     useEffect(() => {
+        if (!isLogin) return;
+
         const getConversations = async () => {
             try {
                 setIsLoading(true);
@@ -39,14 +41,14 @@ const AppSidebarComponent = () => {
                 if (data.success) {
                     setTimeout(() => {
                         setConversation(data.conversations);
-                    }, 1000);
+                    }, 300);
                 }
             } catch (error) {
                 console.log(error);
             } finally {
                 setTimeout(() => {
                     setIsLoading(false);
-                }, 1000);
+                }, 300);
             }
         };
         getConversations();

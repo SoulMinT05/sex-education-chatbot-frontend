@@ -63,7 +63,12 @@ const NavbarComponent = () => {
             <div className="flex items-center gap-0 ">
                 <SidebarTrigger className="!h-6 !w-6 !cursor-pointer" />
 
-                <Button className="!cursor-pointer" onClick={() => router.push('/')} variant="ghost" size="icon">
+                <Button
+                    className="!cursor-pointer"
+                    onClick={() => router.push('/new-conversation')}
+                    variant="ghost"
+                    size="icon"
+                >
                     <Send strokeWidth={1.25} className="!h-6 !w-6" />
                 </Button>
             </div>
@@ -74,7 +79,7 @@ const NavbarComponent = () => {
             <div className="flex items-center gap-4">
                 <Link href="/">Trang chủ</Link>
                 <Link href="/new-conversation">Chat cùng AI</Link>
-                <Link href="/video-agent">Text AI</Link>
+                {/* <Link href="/video-agent">Text AI</Link> */}
                 <Link href="/video-agent-voice">Nói chuyện cùng AI</Link>
                 {/* THEME MENU */}
                 <DropdownMenu>

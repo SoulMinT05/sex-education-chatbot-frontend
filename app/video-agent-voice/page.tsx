@@ -146,67 +146,6 @@ const VideoAgentVoice = () => {
         }
     }, []);
 
-    // const handleStartRecognition = () => {
-    //     setIsLoadingVoiceTypingUser(true);
-    //     console.log('STARTING RECOGNITION');
-    //     voiceRecognitionRef.current?.start();
-    //     setIsLoadingVoiceTypingUser(false);
-    // };
-
-    // const handleStartRecognition = () => {
-    //     setIsLoadingVoiceTypingUser(true);
-    //     console.log('STARTING RECOGNITION');
-
-    //     let silenceTimeout: NodeJS.Timeout;
-
-    //     if (voiceRecognitionRef.current) {
-    //         // Nếu trước đó đang chạy thì stop trước
-    //         voiceRecognitionRef.current.stop();
-
-    //         voiceRecognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-    //             let final_transcript = '';
-    //             for (let i = event.resultIndex; i < event.results.length; ++i) {
-    //                 if (event.results[i].isFinal) {
-    //                     final_transcript += event.results[i][0].transcript;
-    //                 }
-    //             }
-
-    //             if (userInputRef.current) {
-    //                 userInputRef.current.innerText = final_transcript;
-    //             }
-
-    //             // Mỗi khi có kết quả, clear timeout cũ và set timeout mới
-    //             if (silenceTimeout) clearTimeout(silenceTimeout);
-
-    //             // Nếu người dùng ngừng nói 5s thì tự động gọi handleTalk
-    //             silenceTimeout = setTimeout(() => {
-    //                 console.log('🕒 Đã ngừng nói 5s, tự động gọi handleTalk');
-    //                 handleTalk();
-    //             }, 5000);
-    //         };
-
-    //         voiceRecognitionRef.current.onerror = (event: SpeechRecognitionEvent) => {
-    //             console.error('❌ Speech recognition error', event);
-    //         };
-
-    //         (
-    //             voiceRecognitionRef.current as SpeechRecognition & {
-    //                 onend: (this: SpeechRecognition, ev: Event) => void;
-    //             }
-    //         ).onend = () => {
-    //             console.log('📭 Speech recognition ended');
-    //             silenceTimeout = setTimeout(() => {
-    //                 console.log('🕒 Không nói tiếp sau khi kết thúc, gọi handleTalk');
-    //                 handleTalk();
-    //             }, 3000);
-    //         };
-
-    //         voiceRecognitionRef.current.start();
-    //     }
-
-    //     setIsLoadingVoiceTypingUser(false);
-    // };
-
     const [isWaitingBotResponse, setIsWaitingBotResponse] = useState(false);
     const [countdown, setCountdown] = useState(0);
     const silenceTimeoutRef = useRef<NodeJS.Timeout | null>(null);
