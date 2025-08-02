@@ -77,10 +77,16 @@ const NavbarComponent = () => {
             </Button> */}
             {/* RIGHT */}
             <div className="flex items-center gap-4">
-                <Link href="/">Trang chủ</Link>
-                <Link href="/new-conversation">Chat cùng AI</Link>
+                <Button variant="outline">
+                    <Link href="/">Trang chủ</Link>
+                </Button>
+                <Button variant="outline">
+                    <Link href="/new-conversation">Nhắn tin cùng AI</Link>
+                </Button>
                 {/* <Link href="/video-agent">Text AI</Link> */}
-                <Link href="/video-agent-voice">Nói chuyện cùng AI</Link>
+                <Button variant="outline">
+                    <Link href="/video-agent-voice">Trò chuyện cùng AI</Link>
+                </Button>
                 {/* THEME MENU */}
                 <DropdownMenu>
                     <DropdownMenuTrigger asChild>

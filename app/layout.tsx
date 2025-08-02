@@ -1,12 +1,15 @@
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from 'next/font/google';
 import './globals.css';
+import './index.css';
 import { ThemeProvider } from '@/components/providers/ThemeProvider';
+
 // import { cookies } from 'next/headers';
 import { headers } from 'next/headers';
 import { MyContextProvider } from '@/contexts/MyContext';
 import { Toaster } from '@/components/ui/sonner';
 import MainLayout from '@/components/MainLayout';
+import ReduxProvider from '@/providers/ReduxProvider';
 
 const geistSans = Geist({
     variable: '--font-geist-sans',
@@ -41,12 +44,14 @@ export default async function RootLayout({
     return (
         <html lang="en" suppressHydrationWarning>
             <body className={`${geistSans.variable} ${geistMono.variable} antialiased flex`}>
-                <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-                    <MyContextProvider>
-                        <MainLayout>{children}</MainLayout>
-                        <Toaster position="top-right" />
-                    </MyContextProvider>
-                </ThemeProvider>
+                <ReduxProvider>
+                    <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+                        <MyContextProvider>
+                            <MainLayout>{children}</MainLayout>
+                            <Toaster position="top-right" />
+                        </MyContextProvider>
+                    </ThemeProvider>
+                </ReduxProvider>
             </body>
         </html>
     );

@@ -61,7 +61,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
         setDefaultOpen(sidebarState === 'true');
     }, []);
 
-    return pathname !== '/login' ? (
+    return pathname !== '/login' && pathname !== '/' ? (
         <SidebarProvider defaultOpen={defaultOpen}>
             <AppSidebarComponent />
             <main className="w-full">

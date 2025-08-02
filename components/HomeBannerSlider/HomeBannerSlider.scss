@@ -1,0 +1,80 @@
+.homeBannerSlider .swiper-slide-active .info {
+    right: 0px !important;
+    opacity: 1;
+}
+.homeBannerSlider .swiper-slide-active .info h4 {
+    right: 0px !important;
+    opacity: 1;
+}
+.homeBannerSlider .swiper-slide-active .info h2 {
+    right: 0px !important;
+    opacity: 1;
+}
+.homeBannerSlider .swiper-slide-active .info h3 {
+    right: 0px !important;
+    opacity: 1;
+}
+.homeBannerSlider .swiper-slide-active .info .btnShopping {
+    right: 0px !important;
+    opacity: 1;
+}
+.homeBannerSlider .info h4 {
+    transition-duration: 1.2s;
+}
+.homeBannerSlider .info h2 {
+    transition-duration: 1.5s;
+}
+.homeBannerSlider .info h3 {
+    transition-duration: 1.8s;
+}
+.homeBannerSlider .info .btnShopping {
+    transition-duration: 2.1s;
+}
+
+.homeSwiper {
+    overflow: inherit !important;
+}
+.swiper-button-prev,
+.swiper-button-next {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #fff;
+    border-radius: 100%;
+    width: 45px;
+    height: 45px;
+    min-width: 45px;
+    box-shadow: 0 1px 3px #0000001f, 0 1px 2px #0000003d !important;
+}
+.swiper-button-prev:after,
+.swiper-button-next:after {
+    font-size: 22px !important;
+    color: #000;
+}
+.swiper-pagination-bullet-active {
+    background-color: #ff5252 !important;
+}
+.Mui-selected.MuiPaginationItem-page {
+    background-color: #ff5252 !important;
+    color: #fff !important;
+}
+.zoomProductSliderThumbs .swiper-button-next {
+    bottom: 0px !important;
+    right: inherit !important;
+    top: inherit !important;
+    width: 100% !important;
+    height: 30px !important;
+    border-radius: 0px !important;
+}
+
+.inner-image-zoom--icon {
+    display: none !important;
+}
+.swiper-button-prev:hover,
+.swiper-button-next:hover {
+    background-color: #ff5252 !important;
+}
+.swiper-button-prev:hover::after,
+.swiper-button-next:hover::after {
+    color: #fff !important;
+}

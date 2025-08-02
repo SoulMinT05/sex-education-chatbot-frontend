@@ -20,7 +20,9 @@ import {
 import Link from 'next/link';
 import Image from 'next/image';
 
-import logo from '../public/dogcute.jpg';
+// import sex_1_logo from '../public/sex_1.jpg';
+// import sex_2_logo from '../public/sex_2.jpg';
+import sex_3_logo from '../public/sex_3.jpg';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from './ui/dropdown-menu';
 import { useMyContext } from '@/contexts/MyContext';
 import axiosClient from '@/apis/axiosClient';
@@ -61,7 +63,7 @@ const AppSidebarComponent = () => {
                     <SidebarMenuItem>
                         <SidebarMenuButton asChild>
                             <Link href="/">
-                                <Image src={logo} alt="logo" width={20} height={20} />
+                                <Image src={sex_3_logo} alt="logo" width={20} height={20} />
                                 <span>Chatbot Giáo dục giới tính</span>
                             </Link>
                         </SidebarMenuButton>
