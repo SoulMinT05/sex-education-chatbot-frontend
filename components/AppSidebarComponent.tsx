@@ -109,7 +109,7 @@ const AppSidebarComponent = () => {
                                                 onClick={() => setActiveConversationId(conv.id)}
                                             >
                                                 <Link href={`/conversation/${conv.id}`}>
-                                                    <span>{firstUserMsg?.content || 'Không có câu hỏi'}</span>
+                                                    <span>{firstUserMsg?.content || 'Hình ảnh'}</span>
                                                 </Link>
                                             </SidebarMenuButton>
                                         </SidebarMenuItem>

@@ -8,9 +8,11 @@ const HomeBannerImage = ({ image }: { image: string | StaticImageData }) => {
     return (
         <div className="lg:h-[210px] w-full overflow-hidden rounded-md group relative">
             <Image
+                width={200}
+                height={130}
                 src={image}
                 alt=""
-                className="w-full lg:h-[115px] object-cover transition-all duration-150 group-hover:scale-105"
+                className="w-full lg:h-[200px] object-cover transition-all duration-150 group-hover:scale-105"
             />
         </div>
     );

@@ -35,7 +35,7 @@ import 'swiper/css';
 import 'swiper/css/navigation';
 import 'swiper/css/free-mode';
 
-import { LogOut, Moon, Settings, Sun, User } from 'lucide-react';
+import { LogOut, Moon, Settings, Sun, Upload, User } from 'lucide-react';
 import { useTheme } from 'next-themes';
 import { useMyContext } from '@/contexts/MyContext';
 import axiosToken from '@/apis/axiosToken';
@@ -47,15 +47,15 @@ import sex_3_logo from '../public/sex_3.jpg';
 import HomeBannerSlider from '@/components/HomeBannerSlider/HomeBannerSlider';
 import HomeBannerImage from '@/components/HomeBannerImage/HomeBannerImage';
 
-import slider2 from '../public/slider_2.png';
-import slider3 from '../public/slider_3.jpg';
+import banner2 from '../public/banner_2.png';
+import banner3 from '../public/banner_3.jpg';
 import HomeBlogsItem from '@/components/HomeBlogsItem';
 import { useEffect, useState } from 'react';
 import axiosClient from '@/apis/axiosClient';
 import { AxiosError } from 'axios';
 import { useDispatch, useSelector } from 'react-redux';
 import { RootState } from '@/redux/store';
-import { fetchBlogs } from '@/redux/blogSlice';
+import { addBlogs, fetchBlogs } from '@/redux/blogSlice';
 
 type AddBlog = {
     name: string;
@@ -65,7 +65,7 @@ type AddBlog = {
 
 function HomePage() {
     const { setTheme } = useTheme();
-    const { userInfo, setIsLogin, openAlertBox } = useMyContext();
+    const { userInfo, setIsLogin, openAlertBox, isLogin } = useMyContext();
     const router = useRouter();
 
     const { blogs } = useSelector((state: RootState) => state.blog);
@@ -127,6 +127,8 @@ function HomePage() {
 
     const handleAddBlog = async (e: React.MouseEvent<HTMLButtonElement>) => {
         e.preventDefault();
+
+        if (!isLogin) router.push('/login');
         setIsLoadingAddBlog(true);
         try {
             const formData = new FormData();
@@ -150,6 +152,7 @@ function HomePage() {
             console.log('dataAdd : ', data);
             if (data.success) {
                 openAlertBox('success', data.message);
+                dispatch(addBlogs(data?.newBlog));
                 setIsDialogOpen(false);
                 setFormFields({ name: '', description: '', images: [] });
                 setHtml('');
@@ -259,33 +262,37 @@ function HomePage() {
             </header>
             <main className="mt-45 h-full">
                 {/* Navigate to Chatbot */}
-                <div className="max-w-5xl mx-auto mt-10 px-6 py-8 bg-white rounded-xl shadow-md text-center space-y-4">
+                <div className="max-w-5xl mx-auto mt-10 px-6 py-8 rounded-xl shadow-md text-center space-y-4">
                     <h2 className="text-[24px] font-[700]">🎉 Chào mừng bạn đến với</h2>
                     <h1 className="text-[30px] font-[600] text-green-600">Hệ thống Chatbot giáo dục giới tính!</h1>
                     <p className="text-gray-500 text-[14px]">Hãy trải nghiệm ngay với một vài câu hỏi của bạn.</p>
-                    <Button
-                        onClick={() => router.push('/new-conversation')}
-                        className="cursor-pointer bg-green-600 hover:bg-green-700 text-white"
-                    >
-                        🌟 Thử ngay
-                    </Button>
+                    <Link href="/new-conversation">
+                        <Button className="cursor-pointer bg-green-600 hover:bg-green-700 text-white">
+                            🌟 Thử ngay
+                        </Button>
+                    </Link>
                 </div>
 
                 {/* Slider and Banner */}
-                <div className="my-8 mx-1 bg-white">
+                <div className="my-8 mx-1 rounded-xl shadow-md ">
+                    <div className="container">
+                        <h2 className="text-[14px] sm:text-[14px] md:text-[16px] lg:text-[20px] font-[600] mb-4">
+                            Khám phá hình ảnh truyền thông về giáo dục giới tính và bình đẳng giới
+                        </h2>
+                    </div>
                     <div className="container flex flex-col lg:flex-row gap-2 lg:gap-1">
-                        <div className="part1 w-full lg:w-[70%] lg:h-[230px]">
+                        <div className="part1 w-full lg:w-[57%] lg:h-[400px]">
                             <HomeBannerSlider />
                         </div>
-                        <div className="part2 w-full lg:w-[30%] lg:h-[230px] flex items-center gap-2 lg:gap-1 justify-between flex-row lg:flex-col">
-                            <HomeBannerImage image={slider2} />
-                            <HomeBannerImage image={slider3} />
+                        <div className="part2 w-full lg:w-[43%] lg:h-[400px] flex items-center gap-2 lg:gap-1 justify-between flex-row lg:flex-col">
+                            <HomeBannerImage image={banner2} />
+                            <HomeBannerImage image={banner3} />
                         </div>
                     </div>
                 </div>
 
                 {/* Add Blog Modal */}
-                <div className="max-w-5xl mx-auto mt-12 px-6 py-8 bg-white rounded-xl shadow-md text-center space-y-4">
+                <div className="max-w-5xl mx-auto mt-12 px-6 py-8 rounded-xl shadow-md text-center space-y-4">
                     <h1 className="text-[30px] font-[600] text-blue-600">Thêm bài viết</h1>
                     <p className="text-gray-500 text-[14px]">
                         Bạn hoàn toàn có thể nêu lên suy nghĩ của mình về giáo dục giới tính
@@ -297,7 +304,8 @@ function HomePage() {
                                     onClick={() => setIsDialogOpen(true)}
                                     className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
                                 >
-                                    🌟 Tạo bài viết
+                                    <Upload />
+                                    Tạo bài viết
                                 </Button>
                             </DialogTrigger>
                             <DialogContent className="sm:max-w-[800px] w-full overflow-hidden">
@@ -336,14 +344,17 @@ function HomePage() {
                                             ></Editor>
                                         </div>
                                     </div>
-                                    <DialogFooter>
+                                    <DialogFooter className="mt-6">
                                         <DialogClose asChild>
                                             <Button className="cursor-pointer" variant="outline">
                                                 Quay lại
                                             </Button>
                                         </DialogClose>
 
-                                        <Button className="cursor-pointer" onClick={handleAddBlog}>
+                                        <Button
+                                            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white"
+                                            onClick={handleAddBlog}
+                                        >
                                             {isLoadingAddBlog ? 'Loading....' : 'Tạo bài viết'}
                                         </Button>
                                     </DialogFooter>
@@ -355,7 +366,7 @@ function HomePage() {
 
                 {/* Blogs List */}
                 {blogs?.length !== 0 && (
-                    <div className="blogSection mt-10 py-5 pb-8 pt-0 bg-white">
+                    <div className="blogSection mt-10 py-5 pb-8 pt-0">
                         <div className="container">
                             <h2 className="text-[14px] sm:text-[14px] md:text-[16px] lg:text-[20px] font-[600] mb-4">
                                 Bài viết mới nhất
@@ -414,61 +425,3 @@ function HomePage() {
     );
 }
 export default HomePage;
-
-// export const blogs = [
-//     {
-//         _id: '1',
-//         name: 'Hiểu về tuổi dậy thì: Cơ thể bạn thay đổi ra sao?',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Dậy thì là một giai đoạn quan trọng. Cơ thể bạn sẽ trải qua nhiều thay đổi, từ thể chất đến tâm lý.</p>',
-//         createdAt: '2025-07-25T08:00:00Z',
-//     },
-//     {
-//         _id: '2',
-//         name: '5 điều bạn nên biết về sức khỏe sinh sản',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Sức khỏe sinh sản không chỉ là vấn đề của người lớn. Học sinh cũng cần hiểu để tự bảo vệ bản thân.</p>',
-//         createdAt: '2025-07-27T10:30:00Z',
-//     },
-//     {
-//         _id: '3',
-//         name: 'Tình bạn và tình yêu ở tuổi học trò',
-//         images: ['/slider_2.png'],
-//         description: '<p>Phân biệt tình bạn và tình yêu là điều quan trọng giúp bạn có các mối quan hệ lành mạnh.</p>',
-//         createdAt: '2025-07-29T14:15:00Z',
-//     },
-//     {
-//         _id: '4',
-//         name: 'Làm gì khi bị quấy rối nơi công cộng?',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Trang bị kiến thức và kỹ năng tự vệ là điều cần thiết để bảo vệ chính mình trước nguy cơ bị xâm hại.</p>',
-//         createdAt: '2025-07-30T18:45:00Z',
-//     },
-//     {
-//         _id: '5',
-//         name: 'Giới tính và bản dạng giới: Đừng nhầm lẫn!',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Giới tính không chỉ có nam và nữ. Hãy cùng tìm hiểu về sự đa dạng giới trong xã hội hiện đại.</p>',
-//         createdAt: '2025-07-31T21:00:00Z',
-//     },
-//     {
-//         _id: '6',
-//         name: 'Giới tính và bản dạng giới: Đừng nhầm lẫn!',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Giới tính không chỉ có nam và nữ. Hãy cùng tìm hiểu về sự đa dạng giới trong xã hội hiện đại.</p>',
-//         createdAt: '2025-07-31T21:00:00Z',
-//     },
-//     {
-//         _id: '7',
-//         name: 'Giới tính và bản dạng giới: Đừng nhầm lẫn!',
-//         images: ['/slider_2.png'],
-//         description:
-//             '<p>Giới tính không chỉ có nam và nữ. Hãy cùng tìm hiểu về sự đa dạng giới trong xã hội hiện đại.</p>',
-//         createdAt: '2025-07-31T21:00:00Z',
-//     },
-// ];

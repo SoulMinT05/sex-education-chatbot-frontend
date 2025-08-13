@@ -10,6 +10,8 @@ import { useVideoAgentVoice } from '@/hooks/useVideoAgentVoice';
 import { Textarea } from '@/components/ui/textarea';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import axiosClient from '@/apis/axiosClient';
+import { useMyContext } from '@/contexts/MyContext';
 // import Image from 'next/image';
 
 interface SpeechRecognition extends EventTarget {
@@ -54,6 +56,8 @@ interface Window {
 }
 
 const VideoAgentVoice = () => {
+    const { setIsLogin } = useMyContext();
+
     const idleVideoRef = useRef<HTMLVideoElement>(null);
     const talkVideoRef = useRef<HTMLVideoElement>(null);
     const userInputRef = useRef<HTMLInputElement>(null);
@@ -98,6 +102,17 @@ const VideoAgentVoice = () => {
         setSendToDID,
         responseContainerRef,
     });
+
+    useEffect(() => {
+        const checkIsLogin = async () => {
+            const { data } = await axiosClient.get('/api/user/check-is-login');
+            console.log('isLogin: ', data);
+            if (data?.success) {
+                setIsLogin(true);
+            }
+        };
+        checkIsLogin();
+    }, []);
 
     useEffect(() => {
         // Kiểm tra browser có hỗ trợ webkitSpeechRecognition không

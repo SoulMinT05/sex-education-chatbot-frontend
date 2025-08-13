@@ -12,18 +12,7 @@ const MainLayout = ({ children }: { children: React.ReactNode }) => {
     const [defaultOpen, setDefaultOpen] = useState(true);
 
     const pathname = usePathname();
-    const { isLogin, setIsLogin, setUserInfo, setConversation } = useMyContext(); // 👈 Lấy trạng thái đăng nhập từ Context
-
-    useEffect(() => {
-        const checkIsLogin = async () => {
-            const { data } = await axiosClient.get('/api/user/check-is-login');
-            console.log('isLogin: ', data);
-            if (data?.success) {
-                setIsLogin(true);
-            }
-        };
-        checkIsLogin();
-    }, []);
+    const { isLogin, setUserInfo, setConversation } = useMyContext(); // 👈 Lấy trạng thái đăng nhập từ Context
 
     useEffect(() => {
         if (!isLogin) return;

@@ -59,7 +59,7 @@ const HomeBlogsItem = ({ blog }: { blog: Blog }) => {
                 </div>
             </Link>
             <div className="info py-4">
-                <h2 className="text-[12px] lg:text-[14px] font-[600] text-black mb-1 lg:mb-3 line-clamp-1">
+                <h2 className="text-[12px] lg:text-[14px] font-[600]  mb-1 lg:mb-3 line-clamp-1">
                     <Link href={`/blog/${blog?._id}`} className="link">
                         {blog?.name}
                     </Link>
@@ -70,7 +70,7 @@ const HomeBlogsItem = ({ blog }: { blog: Blog }) => {
                 />
                 <Link
                     href={`/blog/${blog?._id}`}
-                    className="link hover:text-blue-400 font-[500] text-[12px] lg:text-[13px] flex items-center gap-1"
+                    className="link hover:text-blue-500 transition-all font-[500] text-[12px] lg:text-[13px] flex items-center gap-1"
                 >
                     Xem thêm <IoIosArrowForward />
                 </Link>

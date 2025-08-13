@@ -2,7 +2,7 @@
 
 import { useParams } from 'next/navigation';
 import React, { useEffect, useRef, useState } from 'react';
-import { ArrowUpIcon } from 'lucide-react';
+import { ArrowUpIcon, Image as ImageLucide, XIcon } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../../../components/ui/button';
 // import { chat } from '@/actions/chat';
@@ -12,10 +12,12 @@ import { useTheme } from 'next-themes';
 import { Skeleton } from '../../../components/ui/skeleton';
 import axiosClient from '@/apis/axiosClient';
 import { useMyContext } from '@/contexts/MyContext';
+import Image from 'next/image';
 
 type Message = {
     role: 'user' | 'assistant';
     content: string;
+    imageBase64?: string | File | null;
 };
 
 type ConversationDetails = Message[][];
@@ -26,16 +28,29 @@ const ConversationPage = () => {
 
     const [conversationDetails, setConversationDetails] = useState<ConversationDetails>([]);
 
-    const { getConversations } = useMyContext();
+    const { getConversations, setIsLogin } = useMyContext();
     const messageEndRef = useRef<HTMLDivElement>(null);
     const inputRef = useRef<HTMLDivElement>(null);
+    const fileInputRef = useRef<HTMLInputElement>(null);
     const [input, setInput] = useState<string>('');
+    const [selectedImage, setSelectedImage] = useState<File | null>(null);
 
     const [isLoading, setIsLoading] = useState<boolean>(false);
     const [isLoadingSendMessage, setIsLoadingSendMessage] = useState<boolean>(false);
     const [hasStartedChat, setHasStartedChat] = useState<boolean>(false);
 
     const { theme } = useTheme();
+
+    useEffect(() => {
+        const checkIsLogin = async () => {
+            const { data } = await axiosClient.get('/api/user/check-is-login');
+            console.log('isLogin: ', data);
+            if (data?.success) {
+                setIsLogin(true);
+            }
+        };
+        checkIsLogin();
+    }, []);
 
     useEffect(() => {
         const getConversationDetails = async () => {
@@ -68,17 +83,30 @@ const ConversationPage = () => {
         scrollToBottom();
     }, [input]);
 
+    // Mở dialog chọn ảnh
+    const handleImageButtonClick = () => {
+        fileInputRef.current?.click();
+    };
+
+    const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        if (e.target.files && e.target.files.length > 0) {
+            setSelectedImage(e.target.files[0]);
+        }
+    };
+
     const paddingBottom = hasStartedChat ? (input.split('\n').length > 3 ? '140px' : '72px') : '0px';
 
     const handleSendMessage = async () => {
-        if (!input.trim() || isLoadingSendMessage) return;
+        if ((!input.trim() && !selectedImage) || isLoadingSendMessage) return;
 
         const userMessage: Message = {
             role: 'user',
-            content: input.trim(),
+            content: input.trim() || '',
+            imageBase64: selectedImage || null,
         };
 
         setInput('');
+        setSelectedImage(null);
         setIsLoadingSendMessage(true);
         setConversationDetails((prev: Message[][]) => [...prev, [userMessage]]);
         setHasStartedChat(true);
@@ -86,10 +114,18 @@ const ConversationPage = () => {
         setTimeout(() => scrollToBottom(), 50);
 
         try {
-            const { data } = await axiosClient.post(`/api/conversation/chat-auth/${id}`, {
-                question: input.trim(),
+            const formData = new FormData();
+            formData.append('question', input.trim());
+
+            if (selectedImage) {
+                formData.append('imageBase64', selectedImage); // selectedImage là File object
+            }
+
+            const { data } = await axiosClient.post(`/api/conversation/chat-auth/${id}`, formData, {
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                },
             });
-            console.log('dataChat: ', data);
 
             const assistantMessage: Message = {
                 role: 'assistant',
@@ -112,6 +148,7 @@ const ConversationPage = () => {
                 return updated;
             });
 
+            if (fileInputRef.current) fileInputRef.current.value = '';
             setTimeout(() => scrollToBottom(), 100);
             getConversations();
         } catch (error) {
@@ -137,21 +174,14 @@ const ConversationPage = () => {
             {/* Message Container. */}
             <div className="flex-1 w-full max-w-3xl px-4">
                 {
-                    <motion.div
-                        // animate={{
-                        //     paddingBottom: input ? (input?.split('\n').length > 3 ? '206px' : '110px') : '80px',
-                        // }}
-                        animate={{ paddingBottom }}
-                        transition={{ duration: 0.2 }}
-                        className="pt-8 space-y-4"
-                    >
+                    <motion.div animate={{ paddingBottom }} transition={{ duration: 0.2 }} className="pt-8 space-y-4">
                         {isLoading &&
                             conversationDetails?.length === 0 &&
                             Array.from({ length: 6 }).map((_, index) => (
                                 <div key={index} className="mb-4">
                                     <motion.div
                                         className={cn('flex', {
-                                            'justify-end': index % 2 === 0,
+                                            'justify-end ': index % 2 === 0,
                                             'justify-start': index % 2 !== 0,
                                         })}
                                     >
@@ -165,33 +195,51 @@ const ConversationPage = () => {
                             conversationDetails?.map((chunk, chunkIndex) => (
                                 <div key={chunkIndex} className="mb-4">
                                     {chunk.map((message, msgIndex) => {
-                                        const isLastMessage =
-                                            chunkIndex === conversationDetails.length - 1 &&
-                                            msgIndex === chunk.length - 1;
                                         return (
                                             <motion.div
                                                 key={msgIndex}
                                                 className={cn('flex', {
-                                                    'justify-end': message.role === 'user',
+                                                    'flex-col items-end': message.role === 'user',
                                                     'justify-start': message.role === 'assistant',
                                                 })}
                                                 initial={{ opacity: 0, y: 20 }}
                                                 animate={{ opacity: 1, y: 0 }}
                                             >
-                                                <div
-                                                    className={cn('max-w-[80%] rounded-xl px-4 py-2 mb-4', {
-                                                        'bg-foreground text-background': message.role === 'user',
-                                                        'bg-muted': message.role === 'assistant',
-                                                    })}
-                                                >
-                                                    {message.role === 'assistant' &&
-                                                    isLastMessage &&
-                                                    isLoadingSendMessage ? (
-                                                        <Skeleton className="w-[536px] h-[48px] rounded-full" />
-                                                    ) : (
+                                                {message?.imageBase64 && (
+                                                    <div className="h-[240px]">
+                                                        <Image
+                                                            src={
+                                                                typeof message.imageBase64 === 'string'
+                                                                    ? message.imageBase64
+                                                                    : URL.createObjectURL(message.imageBase64 as File)
+                                                            }
+                                                            width={300}
+                                                            height={240}
+                                                            alt="image sent"
+                                                            className="mt-2 h-[240px] max-w-full rounded-lg block"
+                                                        />
+                                                    </div>
+                                                )}
+
+                                                <br />
+                                                {message?.content?.trim() && (
+                                                    <div
+                                                        className={cn(
+                                                            'max-w-[80%] rounded-xl px-4 py-2 mb-4',
+                                                            // message.role === 'user' && message?.imageBase64
+                                                            //     ? 'mt-[116px]'
+                                                            //     : 'mt-4',
+                                                            {
+                                                                // 'mt-[116px]': !!message?.imageBase64,
+                                                                'bg-foreground text-background self-end':
+                                                                    message.role === 'user',
+                                                                'bg-muted self-start': message.role === 'assistant',
+                                                            }
+                                                        )}
+                                                    >
                                                         <p className="whitespace-pre-wrap">{message.content}</p>
-                                                    )}
-                                                </div>
+                                                    </div>
+                                                )}
                                             </motion.div>
                                         );
                                     })}
@@ -216,8 +264,35 @@ const ConversationPage = () => {
                         animate={{ height: 'auto' }}
                         whileFocus={{ scale: 1.01 }} // khi focus vào thì phóng to lên 1 chút
                         transition={{ duration: 0.2 }}
-                        className="relative border rounded-2xl lg:rounded-e-3xl p-2.5 flex items-end gap-2 bg-background"
+                        className="relative border  rounded-2xl lg:rounded-e-3xl p-2.5 flex items-end gap-2 bg-background"
                     >
+                        {selectedImage && (
+                            <div className="">
+                                <div className="absolute top-5 left-[30px] -translate-y-4 z-20">
+                                    <Image
+                                        width={60}
+                                        height={50}
+                                        className="w-[60px] h-[40px]"
+                                        src={
+                                            typeof selectedImage === 'string'
+                                                ? selectedImage
+                                                : URL.createObjectURL(selectedImage)
+                                        }
+                                        alt="slider"
+                                    />
+                                </div>
+                                <button
+                                    type="button"
+                                    aria-label="Remove image"
+                                    onClick={() => setSelectedImage(null)}
+                                    className="absolute top-1 left-[69px] -translate-y-1/2 translate-x-1/2 bg-white rounded-full 
+                                        p-0.5 shadow-md cursor-pointer hover:bg-gray-200 z-20"
+                                >
+                                    <XIcon className="w-4 h-4 text-gray-600" />
+                                </button>
+                            </div>
+                        )}
+
                         <div
                             contentEditable
                             role="textbox"
@@ -244,14 +319,50 @@ const ConversationPage = () => {
                                 }
                             }}
                             data-placeholder="Đặt câu hỏi ..."
-                            className="flex-1 min-h-[36px] overflow-y-auto px-3 py-2 focus:outline-none text-sm 
+                            className={`${
+                                selectedImage ? 'pt-10' : 'pt-[20px]'
+                            } flex-1 min-h-[36px] overflow-y-auto px-3 py-2 focus:outline-none text-sm 
                                     bg-background rounded-md empty:before:text-muted-foreground 
                                     empty:before:content-[attr(data-placeholder)] whitespace-pre-wrap break-words
-                                "
+                                `}
                         />
-                        <Button size="icon" className="rounded-full shrink-0 mb-0.5 cursor-pointer">
-                            <ArrowUpIcon strokeWidth={2.5} className="size-5" />
-                        </Button>
+                        <div className="flex gap-1">
+                            {isLoadingSendMessage ? (
+                                <div className="mb-[15px]">
+                                    <span className="text-sm italic text-gray-600 flex items-center">
+                                        Đang trả lời
+                                        <span className="animate-pulse">.</span>
+                                        <span className="animate-pulse delay-150">.</span>
+                                        <span className="animate-pulse delay-300">.</span>
+                                    </span>
+                                </div>
+                            ) : (
+                                <>
+                                    <Button
+                                        onClick={() => handleSendMessage()}
+                                        size="icon"
+                                        className="rounded-full shrink-0 mb-0.5 cursor-pointer"
+                                    >
+                                        <ArrowUpIcon strokeWidth={2.5} className="size-5" />
+                                    </Button>
+                                    <Button
+                                        size="icon"
+                                        className="rounded-full shrink-0 mb-0.5 cursor-pointer p-1 transition-colors"
+                                        aria-label="Upload image"
+                                        onClick={handleImageButtonClick}
+                                    >
+                                        <ImageLucide strokeWidth={2.5} className="size-5" />
+                                    </Button>
+                                    <input
+                                        type="file"
+                                        accept="image/*"
+                                        ref={fileInputRef}
+                                        style={{ display: 'none' }}
+                                        onChange={handleFileChange}
+                                    />
+                                </>
+                            )}
+                        </div>
                     </motion.div>
                 </div>
             </motion.div>

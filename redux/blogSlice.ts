@@ -1,6 +1,18 @@
 import { createSlice } from '@reduxjs/toolkit';
 
-const initialState = {
+type Blog = {
+    _id: string;
+    name: string;
+    images: string[];
+    description: string;
+    created_at: string | Date;
+};
+
+type BlogState = {
+    blogs: Blog[];
+};
+
+const initialState: BlogState = {
     blogs: [],
 };
 
@@ -11,9 +23,12 @@ const blogSlice = createSlice({
         fetchBlogs: (state, action) => {
             state.blogs = action.payload;
         },
+        addBlogs: (state, action) => {
+            state.blogs.unshift(action.payload);
+        },
     },
 });
 
-export const { fetchBlogs } = blogSlice.actions;
+export const { fetchBlogs, addBlogs } = blogSlice.actions;
 
 export default blogSlice.reducer;
