@@ -14,6 +14,7 @@ import { useMyContext } from '@/contexts/MyContext';
 import { useRouter } from 'next/navigation';
 // import DOMPurify from 'dompurify';
 import Image from 'next/image';
+import { Spinner } from './ui/shadcn-io/spinner';
 // import rehypeRaw from 'rehype-raw';
 
 const prompts = [
@@ -170,7 +171,7 @@ const ChatbotUser = () => {
                         ...lastTurn,
                         {
                             role: 'assistant',
-                            content: 'Đã có lỗi xảy ra khi xử lý câu hỏi.',
+                            content: 'Đây không phải câu hỏi về giáo dục giới tính. Vui lòng hỏi lại',
                         },
                     ]);
                 }
@@ -379,14 +380,15 @@ const ChatbotUser = () => {
                         />
                         <div className="flex gap-1">
                             {isLoadingSendMessage ? (
-                                <div className="mb-[8px]">
-                                    <span className="text-sm italic text-gray-600 flex items-center">
-                                        Đang trả lời
-                                        <span className="animate-pulse">.</span>
-                                        <span className="animate-pulse delay-150">.</span>
-                                        <span className="animate-pulse delay-300">.</span>
-                                    </span>
-                                </div>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="rounded-full shrink-0 mb-0.5 p-1 transition-colors"
+                                    aria-label="Upload image"
+                                    disabled={true}
+                                >
+                                    <Spinner variant="circle" strokeWidth={2.5} className="size-5" />
+                                </Button>
                             ) : (
                                 <>
                                     <Button

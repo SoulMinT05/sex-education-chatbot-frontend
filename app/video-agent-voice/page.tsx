@@ -403,7 +403,7 @@ const VideoAgentVoice = () => {
                 <Textarea
                     ref={responseContainerRef}
                     className="min-h-[100px]"
-                    placeholder="Server response will appear here for reference"
+                    placeholder="Câu trả lời sẽ xuất hiện ở đây để người dùng theo dõi"
                 />
             </div>
             <div className="status max-w-3xl mx-auto mt-4 block">

@@ -67,7 +67,6 @@ export function useVideoAgentVoice({
         const init = async () => {
             try {
                 const res = await fetch('/api.json');
-                console.log('resInit: ', res);
                 const config = await res.json();
                 if (!config.key) throw new Error('Missing D-ID key in api.json');
                 if (!config.gemini_key) throw new Error('Missing Gemini Key in api.json');
@@ -350,7 +349,7 @@ export function useVideoAgentVoice({
     };
     const createPeerConnection = async (
         offer: RTCSessionDescriptionInit,
-        iceServers: RTCIceServer[],
+        iceServers: RTCIceServer[]
     ): Promise<RTCSessionDescriptionInit> => {
         if (!peerConnectionRef.current || peerConnectionRef.current.signalingState === 'closed') {
             const pc = new RTCPeerConnection({ iceServers });

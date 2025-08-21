@@ -208,13 +208,10 @@ function HomePage() {
                 </div>
                 <div className="flex items-center gap-4">
                     <Button variant="outline">
-                        <Link href="/">Trang chủ</Link>
+                        <Link href="/new-conversation">Nhắn tin cùng Chatbot</Link>
                     </Button>
                     <Button variant="outline">
-                        <Link href="/new-conversation">Nhắn tin cùng AI</Link>
-                    </Button>
-                    <Button variant="outline">
-                        <Link href="/video-agent-voice">Trò chuyện cùng AI</Link>
+                        <Link href="/video-agent-voice">Trò chuyện cùng Chatbot</Link>
                     </Button>
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>

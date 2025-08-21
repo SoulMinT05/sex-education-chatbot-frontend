@@ -13,6 +13,7 @@ import { Skeleton } from '../../../components/ui/skeleton';
 import axiosClient from '@/apis/axiosClient';
 import { useMyContext } from '@/contexts/MyContext';
 import Image from 'next/image';
+import { Spinner } from '@/components/ui/shadcn-io/spinner';
 
 type Message = {
     role: 'user' | 'assistant';
@@ -160,7 +161,7 @@ const ConversationPage = () => {
                     ...lastChunk,
                     {
                         role: 'assistant',
-                        content: 'Đã có lỗi xảy ra khi xử lý câu hỏi.',
+                        content: 'Đây không phải câu hỏi về giáo dục giới tính. Vui lòng hỏi lại!',
                     },
                 ];
                 return updated;
@@ -328,14 +329,15 @@ const ConversationPage = () => {
                         />
                         <div className="flex gap-1">
                             {isLoadingSendMessage ? (
-                                <div className="mb-[15px]">
-                                    <span className="text-sm italic text-gray-600 flex items-center">
-                                        Đang trả lời
-                                        <span className="animate-pulse">.</span>
-                                        <span className="animate-pulse delay-150">.</span>
-                                        <span className="animate-pulse delay-300">.</span>
-                                    </span>
-                                </div>
+                                <Button
+                                    size="icon"
+                                    variant="ghost"
+                                    className="rounded-full shrink-0 mb-0.5 p-1 transition-colors"
+                                    aria-label="Upload image"
+                                    disabled={true}
+                                >
+                                    <Spinner variant="circle" strokeWidth={2.5} className="size-5" />
+                                </Button>
                             ) : (
                                 <>
                                     <Button
