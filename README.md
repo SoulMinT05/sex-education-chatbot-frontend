@@ -18,42 +18,20 @@ Check out: [Sex Education Chatbot (Server)](https://github.com/SoulMinT05/sex-ed
 
 ## Example Screenshots
 
-![](./src/screenshots/home.png)
-
-![](./src/screenshots/search.png)
-
-![](./src/screenshots/product-list.png)
-
-![](./src/screenshots/product-details.png)
-
-![](./src/screenshots/cart.png)
-
-![](./src/screenshots/voucher.png)
-
-![](./src/screenshots/checkout.png)
-
-![](./src/screenshots/notification.png)
-
-![](./src/screenshots/message.png)
+![](./screenshots/home.png)
+![](./screenshots/add_blog.png)
+![](./screenshots/chatbot.png)
+![](./screenshots/d_id.png)
 
 ## Tech Stack
 
--   **Library**: ReactJS
--   **UI Library**: Material UI
+-   **Framework**: NextJS
+-   **UI Library**: shadcn-ui
 -   **State Management**: Redux Toolkit
--   **Routing**: React Router DOM
--   **Styling**: TailwindCSS, SCSS, CSS
--   **Utilities**: Axios, JS-Cookies, Firebase, DayJS
--   **Image Viewer**: react-inner-image-zoom, react-image-zoom
--   **Notification**: react-toastify, react-hot-toast
--   **Emoji**: emoji-picker-react
+-   **Styling**: TailwindCSS
+-   **Utilities**: Axios, JS-Cookies, Firebase
 
 ## Getting Started
-
-### Prerequisites
-
--   Node.js (v22.16 or later recommended)
--   npm or yarn package manager
 
 ### Installation
 
@@ -76,16 +54,18 @@ Check out: [Sex Education Chatbot (Server)](https://github.com/SoulMinT05/sex-ed
     - Ensure the following variables are set in `.env`, and adjust them to match your API endpoints and Cloudinary storage configuration:
 
         ```env
-        VITE_FRONTEND_URL=http://localhost:3000
-        VITE_BACKEND_URL=http://localhost:8000
-        VITE_API_KEY=api-key
-        VITE_AUTH_DOMAIN=auth-domain
-        VITE_PROJECT_ID=project-id
-        VITE_STORAGE_BUCKET=storage-bucket
-        VITE_MESSAGING_SENDER_ID=messaging-sender-id
-        VITE_APP_ID=id
-        VITE_APP_ID_FACEBOOK=id-facebook
-        VITE_APP_SECRET_FACEBOOK=secret-facebook
+        NEXT_PUBLIC_FRONTEND_URL=
+        NEXT_PUBLIC_BACKEND_URL_NODEJS=
+        NEXT_PUBLIC_BACKEND_URL_PYTHON=
+        NEXT_GOOGLE_GEMINI_KEY=
+        NEXT_GOOGLE_D_ID_KEY=
+        NEXT_OPENAI_KEY=
+        NEXT_PUBLIC_API_KEY=
+        NEXT_PUBLIC_AUTH_DOMAIN=
+        NEXT_PUBLIC_PROJECT_ID=
+        NEXT_PUBLIC_STORAGE_BUCKET=
+        NEXT_PUBLIC_MESSAGING_SENDER_ID=
+        NEXT_PUBLIC_APP_ID=
         ```
 
 ### Development Server
