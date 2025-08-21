@@ -19,8 +19,11 @@ Check out: [Sex Education Chatbot (Server)](https://github.com/SoulMinT05/sex-ed
 ## Example Screenshots
 
 ![](./screenshots/home.png)
+
 ![](./screenshots/add_blog.png)
+
 ![](./screenshots/chatbot.png)
+
 ![](./screenshots/d_id.png)
 
 ## Tech Stack
