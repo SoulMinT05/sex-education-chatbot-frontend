@@ -72,15 +72,18 @@ Check out: [Sex Education Chatbot (Server)](https://github.com/SoulMinT05/sex-ed
         ```
 
     - Add public/api.json for API keys and service URLs to use Chatbot Robot. Example structure:
-      {
-      "key": "d-id_key_here",
-      "gemini_key": "gemini_key_here",
-      "openai_key": "openai_key_here",
-      "did_url": "https://api.d-id.com",
-      "gemini_url": "https://your-gemini-api-endpoint",
-      "model": "gpt-4o-mini",
-      "voice_id": "vi-VN-HoaiMyNeural"
-      }
+
+    ```json
+    {
+        "key": "d-id_key_here",
+        "gemini_key": "gemini_key_here",
+        "openai_key": "openai_key_here",
+        "did_url": "https://api.d-id.com",
+        "gemini_url": "https://your-gemini-api-endpoint",
+        "model": "gpt-4o-mini",
+        "voice_id": "vi-VN-HoaiMyNeural"
+    }
+    ```
 
 ### Development Server
 
